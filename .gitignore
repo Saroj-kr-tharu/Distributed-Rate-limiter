@@ -1,0 +1,111 @@
+# ==============================================================================
+# Enterprise Root .gitignore - Distributed Rate Limiting Monorepo / Multi-Service
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Dependencies & Package Managers
+# ------------------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+.pnpm-debug.log*
+.yarn-integrity
+yarn-error.log*
+npm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# Build Outputs & Compilation Caches
+# ------------------------------------------------------------------------------
+dist/
+build/
+out/
+.next/
+.tsup/
+*.tsbuildinfo
+*.esbuild
+
+# ------------------------------------------------------------------------------
+# Environment Variables & Secrets (CRITICAL: Never commit credentials)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.test.example
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa*
+
+# ------------------------------------------------------------------------------
+# Runtime Logs & Process Tracking
+# ------------------------------------------------------------------------------
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------------------------------------------------------
+# Database & In-Memory Cache Dumps
+# ------------------------------------------------------------------------------
+dump.rdb
+appendonly.aof
+*.sqlite
+*.sqlite3
+*.db
+/postgres_data/
+/redis_data/
+/prometheus_data/
+
+# ------------------------------------------------------------------------------
+# Prisma ORM Artifacts
+# ------------------------------------------------------------------------------
+/src/generated/prisma/
+prisma/generated/
+*.db-journal
+
+# ------------------------------------------------------------------------------
+# Testing, Coverage & Profiling
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+junit.xml
+test-results/
+
+# ------------------------------------------------------------------------------
+# Operating System & IDE Artifacts
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Editors & IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------------------------
+# Containers & Docker
+# ------------------------------------------------------------------------------
+.docker/
+docker-compose.override.yml

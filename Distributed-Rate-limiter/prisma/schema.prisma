@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model TodoLists { 
+  id              Int      @id @default(autoincrement()) 
+  title           String   
+  description     String?
+  author          User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId        Int   
+  color           Role     @default(ORANGE) 
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+} 
+
+enum Role { 
+  GREEN 
+  RED
+  ORANGE
+} 
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+model User { 
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  username      String? 
+  role          UserRole  @default(CUSTOMER)
+  isActive      Boolean   @default(true)
+  password      String    
+  refreshToken  String?  
+  todos         TodoLists[]
+}
+
+

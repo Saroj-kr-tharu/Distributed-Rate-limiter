@@ -1,0 +1,18 @@
+FROM node:24-alpine AS builder
+WORKDIR /RateLimiter/Backend
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:24-alpine
+WORKDIR /RateLimiter/Backend
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+COPY --from=builder /RateLimiter/Backend/dist ./dist
+COPY --from=builder /RateLimiter/Backend/src/generated/prisma ./src/generated/prisma
+COPY --from=builder /RateLimiter/Backend/prisma ./prisma
+COPY --from=builder /RateLimiter/Backend/prisma.config.ts ./prisma.config.ts
+
+CMD ["node", "dist/server.js"]

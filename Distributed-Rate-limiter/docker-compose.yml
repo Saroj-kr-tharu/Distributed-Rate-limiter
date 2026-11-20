@@ -1,0 +1,93 @@
+networks:
+  RateLimiter_net:
+    name: RateLimiter_net
+    driver: bridge
+
+volumes:
+  redis_db_vol:
+  postgres_db_vol:
+  prometheus_data:
+
+services:
+
+  postgres_service:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    networks:
+      - RateLimiter_net
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "12345"
+      POSTGRES_DB: WorkList
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_db_vol:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d WorkList"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis_service:
+    image: redis:alpine
+    container_name: redis_service
+    restart: unless-stopped
+    networks:
+      - RateLimiter_net
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_db_vol:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend_service:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: backend_service
+    restart: unless-stopped
+    networks:
+      - RateLimiter_net
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:12345@postgres_service:5432/WorkList
+      REDIS_URL: redis://redis_service:6379
+    depends_on:
+      postgres_service:
+        condition: service_healthy
+      redis_service:
+        condition: service_healthy
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        npm start
+      "
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_service
+    restart: unless-stopped
+    networks:
+      - RateLimiter_net
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    depends_on:
+      - backend_service
